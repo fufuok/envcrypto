@@ -42,7 +42,7 @@ Output:
 
 ```shell
 Set environment variable in your OS:
-    export APP_API_SECRET=hzONuFZreUEDDRoHC20GJ7bkDDKGN1Mj4lcqn9osqGU=
+    export APP_API_SECRET=nCLsX_ZexFKqnUOeA41btpt4_RaARjjuHNucHExP9F0=
 In your code:
     data = 'AABB.Fufu@TEST001'
 

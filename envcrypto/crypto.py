@@ -26,7 +26,7 @@ from Crypto.Util import Padding
 def set_environ(varname: str = '', value: str = '', key: Any = None) -> str:
     """Set an environment variable (encrypt data)"""
     if key is not None:
-        value = encrypt(value, get_key_32(key))
+        value = encrypt(value, key)
 
     os.environ[varname] = value
 
@@ -40,7 +40,7 @@ def get_environ(varname: str = '', key: Any = None, default: str = '') -> str:
         return default
 
     if key is not None:
-        value = decrypt(value, get_key_32(key))
+        value = decrypt(value, key)
 
     return value
 
