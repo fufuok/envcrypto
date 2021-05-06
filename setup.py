@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setup(
     name='envcrypto',
-    version='0.0.2',
+    version='0.1.0',
     description='A safe way to store environmental variables.',
     long_description_content_type='text/markdown',
     long_description=long_description,
@@ -13,7 +13,7 @@ setup(
     author_email='fufuokok@gmail.com',
     url='https://github.com/fufuok/envcrypto',
     license='MIT',
-    packages=find_packages(exclude=['docs', 'tests*', 'venvw', 'other']),
+    packages=find_packages(exclude=['tmp']),
     classifiers=[
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
