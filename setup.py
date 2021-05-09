@@ -5,7 +5,7 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setup(
     name='envcrypto',
-    version='0.1.0',
+    version='0.2.0',
     description='A safe way to store environmental variables.',
     long_description_content_type='text/markdown',
     long_description=long_description,

@@ -12,6 +12,7 @@
         Ref: example.py
 
     :author: Fufu, 2020/4/29
+    :update: Fufu, 2020/5/9 base58 for set_environ
 """
 import os
 from base64 import b64decode, b64encode, urlsafe_b64decode, urlsafe_b64encode
@@ -22,8 +23,12 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util import Padding
 
+from .base58 import b58dc, b58ec
 
-def set_environ(varname: str = '', value: Union[bytes, Any] = None, key: Any = None) -> str:
+
+def set_environ(
+        varname: str = '', value: Union[bytes, Any] = None, key: Any = None
+) -> str:
     """Set an environment variable (encrypt data)"""
     if key is not None:
         value = encrypt(value, key)
@@ -34,7 +39,9 @@ def set_environ(varname: str = '', value: Union[bytes, Any] = None, key: Any = N
     return value
 
 
-def get_environ(varname: str = '', key: Any = None, default: Union[bytes, str, None] = None) -> Union[bytes, str, None]:
+def get_environ(
+        varname: str = '', key: Any = None, default: Union[bytes, str, None] = None
+) -> Union[bytes, str, None]:
     """Get an environment variable (decrypt data)"""
     value = os.getenv(varname)
     if value is None:
@@ -46,53 +53,84 @@ def get_environ(varname: str = '', key: Any = None, default: Union[bytes, str, N
     return value
 
 
-def get_key_32(key: Any = None) -> bytes:
+def get_key_32(
+        key: Any = None
+) -> bytes:
     """Any value generate key (32 bytes)"""
-    checksum = md5(bytes(str(key), encoding='utf-8'))
-    return checksum.digest() + bytes(checksum.hexdigest(), encoding='utf-8')[8:24]
+    return bytes(md5(bytes(str(key), encoding='utf-8')).hexdigest(), encoding='utf-8')
 
 
-def encrypt(plaintext: Union[bytes, Any], key: Any = None) -> str:
-    """Use get_key_32 encrypt and return to url-safe base64-encoded string"""
-    return encrypt_aes_cbc_urlsafe_b64(plaintext, get_key_32(key))
+def encrypt(
+        plaintext: Union[bytes, Any], key: Any = None
+) -> str:
+    """Use get_key_32 encrypt and return to base58-encoded string"""
+    return encrypt_aes_cbc_b58(plaintext, get_key_32(key))
 
 
-def decrypt(ciphertext: str, key: Any = None) -> Union[bytes, str, None]:
+def decrypt(
+        ciphertext: str, key: Any = None
+) -> Union[bytes, str, None]:
     """Use get_key_32 decrypt and return to bytes/str/None"""
-    return decrypt_aes_cbc_urlsafe_b64(ciphertext, get_key_32(key))
+    return decrypt_aes_cbc_b58(ciphertext, get_key_32(key))
 
 
-def encrypt_aes_cbc(data_src: Union[bytes, Any], key: Any = None, iv: Any = None,
-                    bits: int = 256) -> Union[bytes, None]:
+def encrypt_aes_cbc(
+        data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, None]:
     return AESCipher(key, iv, bits).encrypt_aes_cbc(data_src)
 
 
-def encrypt_aes_cbc_hex(data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256) -> str:
+def encrypt_aes_cbc_hex(
+        data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256
+) -> str:
     return AESCipher(key, iv, bits).encrypt_aes_cbc_hex(data_src)
 
 
-def encrypt_aes_cbc_b64(data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256) -> str:
+def encrypt_aes_cbc_b58(
+        data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256
+) -> str:
+    return AESCipher(key, iv, bits).encrypt_aes_cbc_b58(data_src)
+
+
+def encrypt_aes_cbc_b64(
+        data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256
+) -> str:
     return AESCipher(key, iv, bits).encrypt_aes_cbc_b64(data_src)
 
 
-def encrypt_aes_cbc_urlsafe_b64(data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256) -> str:
+def encrypt_aes_cbc_urlsafe_b64(
+        data_src: Union[bytes, Any], key: Any = None, iv: Any = None, bits: int = 256
+) -> str:
     return AESCipher(key, iv, bits).encrypt_aes_cbc_urlsafe_b64(data_src)
 
 
-def decrypt_aes_cbc(encrypted: bytes, key: Any = None, iv: Any = None, bits: int = 256) -> Union[bytes, str, None]:
+def decrypt_aes_cbc(
+        encrypted: bytes, key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, str, None]:
     return AESCipher(key, iv, bits).decrypt_aes_cbc(encrypted)
 
 
-def decrypt_aes_cbc_hex(encrypted: str, key: Any = None, iv: Any = None, bits: int = 256) -> Union[bytes, str, None]:
+def decrypt_aes_cbc_hex(
+        encrypted: str, key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, str, None]:
     return AESCipher(key, iv, bits).decrypt_aes_cbc_hex(encrypted)
 
 
-def decrypt_aes_cbc_b64(encrypted: str, key: Any = None, iv: Any = None, bits: int = 256) -> Union[bytes, str, None]:
+def decrypt_aes_cbc_b58(
+        encrypted: str, key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, str, None]:
+    return AESCipher(key, iv, bits).decrypt_aes_cbc_b58(encrypted)
+
+
+def decrypt_aes_cbc_b64(
+        encrypted: str, key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, str, None]:
     return AESCipher(key, iv, bits).decrypt_aes_cbc_b64(encrypted)
 
 
-def decrypt_aes_cbc_urlsafe_b64(encrypted: str, key: Any = None, iv: Any = None,
-                                bits: int = 256) -> Union[bytes, str, None]:
+def decrypt_aes_cbc_urlsafe_b64(
+        encrypted: str, key: Any = None, iv: Any = None, bits: int = 256
+) -> Union[bytes, str, None]:
     return AESCipher(key, iv, bits).decrypt_aes_cbc_urlsafe_b64(encrypted)
 
 
@@ -125,6 +163,10 @@ class AESCipher:
         encrypted = self.encrypt_aes_cbc(data)
         return '' if encrypted is None else encrypted.hex()
 
+    def encrypt_aes_cbc_b58(self, data: Union[bytes, Any]) -> str:
+        encrypted = self.encrypt_aes_cbc(data)
+        return '' if encrypted is None else b58ec(encrypted)
+
     def encrypt_aes_cbc_b64(self, data: Union[bytes, Any]) -> str:
         encrypted = self.encrypt_aes_cbc(data)
         return '' if encrypted is None else b64encode(encrypted).decode('utf-8')
@@ -152,6 +194,12 @@ class AESCipher:
     def decrypt_aes_cbc_b64(self, encrypted: str) -> Union[bytes, str, None]:
         try:
             return self.decrypt_aes_cbc(b64decode(str(encrypted).strip()))
+        except Exception:
+            return None
+
+    def decrypt_aes_cbc_b58(self, encrypted: str) -> Union[bytes, str, None]:
+        try:
+            return self.decrypt_aes_cbc(b58dc(str(encrypted).strip()))
         except Exception:
             return None
 

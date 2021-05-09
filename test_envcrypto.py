@@ -21,7 +21,7 @@ class TestEnvcrypto(unittest.TestCase):
     def test_environ_str(self):
         env_value = set_environ(self.env_name, self.raw_str, self.key)
         self.assertIsInstance(env_value, str)
-        self.assertIsNotNone(urlsafe_b64decode(env_value))
+        self.assertIsNotNone(b58dc(env_value))
 
         get_env_value = get_environ(self.env_name)
         self.assertEqual(get_env_value, env_value)
@@ -35,7 +35,7 @@ class TestEnvcrypto(unittest.TestCase):
     def test_environ_bytes(self):
         env_value = set_environ(self.env_name, self.raw_bytes, self.key)
         self.assertIsInstance(env_value, str)
-        self.assertIsNotNone(urlsafe_b64decode(env_value))
+        self.assertIsNotNone(b58dc(env_value))
 
         get_env_value = get_environ(self.env_name)
         self.assertEqual(get_env_value, env_value)
@@ -49,7 +49,7 @@ class TestEnvcrypto(unittest.TestCase):
     def test_environ_other(self):
         env_value = set_environ(self.env_name, self.raw_list, self.key)
         self.assertIsInstance(env_value, str)
-        self.assertIsNotNone(urlsafe_b64decode(env_value))
+        self.assertIsNotNone(b58dc(env_value))
 
         get_env_value = get_environ(self.env_name)
         self.assertEqual(get_env_value, env_value)
@@ -67,24 +67,29 @@ class TestEnvcrypto(unittest.TestCase):
     def test_helper(self):
         en_1 = encrypt_aes_cbc(self.raw_str, self.key)
         en_2 = encrypt_aes_cbc_hex(self.raw_str, self.key)
-        en_3 = encrypt_aes_cbc_b64(self.raw_str, self.key)
-        en_4 = encrypt_aes_cbc_urlsafe_b64(self.raw_str, self.key)
+        en_3 = encrypt_aes_cbc_b58(self.raw_str, self.key)
+        en_4 = encrypt_aes_cbc_b64(self.raw_str, self.key)
+        en_5 = encrypt_aes_cbc_urlsafe_b64(self.raw_str, self.key)
         self.assertIsInstance(en_1, bytes)
         self.assertIsInstance(en_2, str)
         self.assertIsInstance(en_3, str)
         self.assertIsInstance(en_4, str)
+        self.assertIsInstance(en_5, str)
         self.assertIsNotNone(en_1)
         self.assertIsNotNone(bytes.fromhex(en_2))
-        self.assertIsNotNone(b64decode(en_3))
-        self.assertIsNotNone(urlsafe_b64decode(en_4))
+        self.assertIsNotNone(b58dc(en_3))
+        self.assertIsNotNone(b64decode(en_4))
+        self.assertIsNotNone(urlsafe_b64decode(en_5))
         de_1 = decrypt_aes_cbc(en_1, self.key)
         de_2 = decrypt_aes_cbc_hex(en_2, self.key)
-        de_3 = decrypt_aes_cbc_b64(en_3, self.key)
-        de_4 = decrypt_aes_cbc_urlsafe_b64(en_4, self.key)
+        de_3 = decrypt_aes_cbc_b58(en_3, self.key)
+        de_4 = decrypt_aes_cbc_b64(en_4, self.key)
+        de_5 = decrypt_aes_cbc_urlsafe_b64(en_5, self.key)
         self.assertEqual(de_1, self.raw_str)
         self.assertEqual(de_2, self.raw_str)
         self.assertEqual(de_3, self.raw_str)
         self.assertEqual(de_4, self.raw_str)
+        self.assertEqual(de_5, self.raw_str)
 
     def test_std_aes_cbc(self):
         for bits in [128, 192, 256]:
@@ -112,6 +117,7 @@ class TestEnvcrypto(unittest.TestCase):
         self.assertIsInstance(random_key, bytes)
         random_key_100 = AESCipher().mk_key(length=100)
         self.assertEqual(len(random_key_100), 100)
+        self.assertEqual(len(get_key_32()), 32)
 
         raw = True
         aes = AESCipher()
